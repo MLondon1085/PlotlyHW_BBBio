@@ -1,29 +1,65 @@
 function buildMetadata(sample) {
 
-  // @TODO: Complete the following function that builds the metadata panel
+  
+  // Use d3 to select the panel with id of `#sample-metadata`
+var url = `/metadata/${sample}`;
+d3.json(url).then(function(sample){
+ console.log(data);
 
-  // Use `d3.json` to fetch the metadata for a sample
-    // Use d3 to select the panel with id of `#sample-metadata`
+var metadata=d3.select("#sample-metadata");
 
-    // Use `.html("") to clear any existing metadata
-
-    // Use `Object.entries` to add each key and value pair to the panel
-    // Hint: Inside the loop, you will need to use d3 to append new
-    // tags for each key-value in the metadata.
-
-    // BONUS: Build the Gauge Chart
-    // buildGauge(data.WFREQ);
+metadata.html("");
+Object.entries(sample).forEach(function ([key, value]) {
+var row = metadata.append("panel-body");
+row.text(`${key}: ${value} \n`);
+});
+});
 }
 
 function buildCharts(sample) {
+var url = `/samples/${sample}`;
+d3.json(url).then(function(data) {
+  console.log(data);
+  var xaxis = data.otu_ids;
+  var yaxis = data.sample_values;
+  var mode_size = data.sample_values;
+  var mode_colors = data.otu_ids; 
+  var text_values = data.otu_labels;
 
-  // @TODO: Use `d3.json` to fetch the sample data for the plots
+  var trace1 = {
+    x: xaxis,
+    y: yaxis,
+    text: text_values,
+    mode: 'markers',
+    marker: {
+      color: mode_colors,
+      size: mode_size
+    } 
+  };
 
-    // @TODO: Build a Bubble Chart using the sample data
+  var data = [trace1];
 
-    // @TODO: Build a Pie Chart
-    // HINT: You will need to use slice() to grab the top 10 sample_values,
-    // otu_ids, and labels (10 each).
+  var layout = {
+    xaxis: { title: "OTU ID"},
+  };
+
+  Plotly.newPlot('bubble', data, layout);
+  d3.json(url).then(function(data) {  
+    var pie_values = data.sample_values.slice(0,10);
+      var pie_labels = data.otu_ids.slice(0,10);
+      var pie_hover = data.otu_labels.slice(0,10);
+
+      var data = [{
+        values: pie_values,
+        labels: pie_labels,
+        hovertext: pie_hover,
+        type: 'pie'
+      }];
+
+      Plotly.newPlot('pie', data);
+
+    });
+  });   
 }
 
 function init() {
